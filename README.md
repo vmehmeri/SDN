@@ -1,9 +1,7 @@
 SDN - Software Defined Networking experiments with mininet
-
-by Victor Mehmeri (vime@fotonik.dtu.dk)
 ==================================================================================
 
-DEPENDS ON iperf3
+DEPENDS ON IPERF3
 
 There are two pythons scripts, fattree.py and jellyfish.py, which run evaluation experiments for Fat-Tree and Jellyfish datacenter topologies, respectively.
 
