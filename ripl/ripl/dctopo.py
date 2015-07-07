@@ -515,7 +515,7 @@ class JellyfishTopo(StructuredTopo):
         for i in range(1, self.nServers + 1):
             host = self.id_gen(i, i)
             opts = self.def_nopts(host, self.LAYER_HOST)
-            servers.append(self.addHost(host.name_str(), **opts))
+            servers.append(self.addHost(host.name_str(), cpu=.5/self.nServers, **opts))
 
         # add the switches
         switches = []
@@ -528,7 +528,7 @@ class JellyfishTopo(StructuredTopo):
 
         # connect each server with a switch
         for i in range(self.nServers):
-            self.addLink(servers[i], switches[i], bw=1000, delay='0.1ms') #delay, bandwidth?
+            self.addLink(servers[i], switches[i]) #, bw=1000, delay='0.1ms') #delay, bandwidth?
             openPorts[i] -= 1
 
         # manage the potential links, fully populate the set before creating

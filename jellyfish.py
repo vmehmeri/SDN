@@ -199,7 +199,7 @@ def runTCPTest(net, topo, servers, clients):
 		monitorOutput(popens, 300)
 	
 	
-def runUDPTest(net, topo, servers, clients, bwList = [1]):
+def runUDPTest(net, topo, servers, clients, bwList = [5]):
 	"""
 	Run IPERF UDP test, for jitter and packet loss measurement,
 	:param net: mininet network
@@ -223,7 +223,7 @@ def runUDPTest(net, topo, servers, clients, bwList = [1]):
 		for index in range(0, len(clients)):
 			clientHost = net.get(clients[index])
 			serverHost = net.get(servers[index])
-			clientHost.popen('ping -n -c 1 %s -W 5 ' %(serverHost.IP()), shell=True)
+			clientHost.popen('ping -n -c 1 %s -W 5' %(serverHost.IP()), shell=True)
 
 		time.sleep(5)
 
@@ -234,18 +234,17 @@ def runUDPTest(net, topo, servers, clients, bwList = [1]):
 				#duration = IPERF_TEST_DURATION
 				#if IPERF tests start to fail, try uncommenting the following lines
 				duration = IPERF_TEST_DURATION + len(clients) - index
-				time.sleep(1)
 				clientHost = net.get(clients[index])
 				serverHost = net.get(servers[index])
 				logger.debug("%s --> %s" %(clientHost.IP(), serverHost.IP()))
 				popens[index] = clientHost.popen('iperf3 -O 10 -f k -u -b %.1fM -i 10 -t %d -Z -c %s >> results/%s_udp_results_%.1fM_%d 2>&1' %(bw, duration, serverHost.IP(), FILE_PREFIX, bw, run), shell=True)
-				
+				time.sleep(1)
 
 			logger.debug(">>> Waiting for UDP test to finish...")
 
-			monitorOutput(popens, 300)
-
-
+			monitorOutput(popens, 12000)
+		
+		
 
 def netTest(net):
     logger.debug("Testing network...")
@@ -264,8 +263,10 @@ def run():
 	if CONTROLLER:
 		net = Mininet(topo=topo, link=TCLink, host=CPULimitedHost, controller=None)
 		net.addController('controller',controller=RemoteController,ip=CONTROLLER_IP,port=CONTROLLER_PORT)
+		logging.debug( 	">>> Connecting to controller at %s:%s" % (CONTROLLER_IP, CONTROLLER_PORT) )
 	else:
 		net = Mininet(switch=OVSBridgeSTP, topo=topo, host=CPULimitedHost, link=TCLink, controller=None)
+		logging.debug( ">>> Using Spanning Tree Protocol" )
  
 	net.start()
 	servers, clients = generateServerClientPairs(net, topo)
@@ -273,7 +274,7 @@ def run():
 	#netTest(net)
 	
 	#allow some time for the controller to initialize all the links
-	time.sleep(30)
+	time.sleep(300)
 	
 	runPingTest(net, topo, servers, clients)
 	startIperfServers(net, topo, servers)
